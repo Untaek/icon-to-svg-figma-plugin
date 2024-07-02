@@ -76,4 +76,4 @@ function Utf8ArrayToStr(array: Uint8Array) {
   return out;
 }
 
-const camelize = (s: string) => `-${s}`.replace(/-./g, x=>x[1].toUpperCase())
+const camelize = (s: string) => `-${s}`.split('/').join('-').replace(/-./g, x=>x[1].toUpperCase())

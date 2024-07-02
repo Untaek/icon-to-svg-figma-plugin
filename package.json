@@ -32,8 +32,8 @@
     "editorType": [
       "figma"
     ],
-    "id": "preact-tailwindcss",
-    "name": "Preact Tailwind Css",
+    "id": "icon-to-svg",
+    "name": "Icon to Svg",
     "main": "src/main.ts",
     "ui": "src/ui.tsx"
   }
