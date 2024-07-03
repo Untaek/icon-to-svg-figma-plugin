@@ -1,16 +1,72 @@
 import { getSceneNodeById, getSelectedNodesOrAllNodes, on, showUI } from '@create-figma-plugin/utilities'
 import { types } from './types'
 
+let transformStroke = false
+
 export default async function () {
+  on('transform-stroke', (value) => {
+    transformStroke = value
+    invalidate()
+  })
+
+  figma.on('selectionchange', async () => {
+    invalidate()
+  })
+
+  invalidate()
+}
+
+const invalidate = async () => {
+  const scenes = await collectScenes()
+  showUI({
+    height: 400,
+    width: 600
+  }, {
+    nodes: scenes,
+    transformStroke
+  })
+}
+
+const collectScenes = async () => {
   const selectedScenes = getSelectedNodesOrAllNodes()
 
-  const scenePromises: Promise<types.Component>[] = selectedScenes.map(async scene => {
-    const componentName = camelize(scene.name)
-    const svgUintArray = await scene.exportAsync({format: 'SVG'})
+  console.log(selectedScenes[0].type)
+
+  const flat: { node: SceneNode, name: string }[] = []
+
+  for (const scene of selectedScenes) {
+    if (scene.type === 'COMPONENT_SET') {
+      for(const child of scene.children) {
+        if (child.type === 'COMPONENT') {
+          const parts = child.name.split(/,\s*/);
+          const formattedParts = parts.map(part => part.split('=')[1]);
+          const name = formattedParts.join('/') || child.name
+          flat.push({ name: `${scene.name}/${name}`, node: child })
+        }
+      }
+    }
+    else if (scene.type === 'COMPONENT') {
+      flat.push({ name: scene.name, node: scene })
+    }
+  }
+
+  console.log(flat)
+
+  const scenePromises: Promise<types.Component>[] = flat.map(async scene => {
+    const componentName = pascalize(scene.name)
+    const svgUintArray = await scene.node.exportAsync({format: 'SVG'})
 
     let svgMarkup = Utf8ArrayToStr(svgUintArray)
 
-      svgMarkup = svgMarkup.replace('xmlns="http://www.w3.org/2000/svg"', 'xmlns="http://www.w3.org/2000/svg" {...props}')
+    const htmlPlainProperties = ['stroke-dasharray', 'stroke-width', 'stroke-linecap', 'stroke-linejoin', 'stroke-dash-offset', 'stroke-miterlimit', 'stroke-opacity', 'stroke-width', 'clip-path', 'clip-rule', 'fill-opacity', 'fill-rule']
+    svgMarkup = svgMarkup.replace('xmlns="http://www.w3.org/2000/svg"', 'xmlns="http://www.w3.org/2000/svg" {...props}')
+    for(const property of htmlPlainProperties) {
+      svgMarkup = svgMarkup.replace(new RegExp(property, 'g'), camelize(property))
+    }
+
+    if (transformStroke) {
+      svgMarkup = svgMarkup.replace(/stroke="#?[^"]*"/g, 'stroke="currentColor"')
+    }
 
       svgMarkup = `
 import { SVGProps } from 'react'
@@ -22,7 +78,7 @@ export { ${componentName} }
       `
 
     return {
-      id: scene.id,
+      id: scene.node.id,
       name: scene.name,
       svg: svgMarkup,
       componentName: componentName
@@ -31,15 +87,7 @@ export { ${componentName} }
 
   const scenes = await Promise.all(scenePromises)
 
-  on('DOWNLOAD', () => {
-  })
-
-  showUI({
-    height: 400,
-    width: 600
-  }, {
-    nodes: scenes
-  })
+  return scenes
 }
 
 function Utf8ArrayToStr(array: Uint8Array) {
@@ -76,4 +124,5 @@ function Utf8ArrayToStr(array: Uint8Array) {
   return out;
 }
 
-const camelize = (s: string) => `-${s}`.split('/').join('-').replace(/-./g, x=>x[1].toUpperCase())
+const pascalize = (s: string) => `-${s}`.split('/').join('-').replace(/-./g, x=>x[1].toUpperCase())
+const camelize = (s: string) => `${s}`.split('/').join('-').replace(/-./g, x=>x[1].toUpperCase())

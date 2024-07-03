@@ -1,4 +1,4 @@
-import { Button, Container, Text, VerticalSpace, render } from '@create-figma-plugin/ui'
+import { Button, Checkbox, Container, Text, VerticalSpace, render } from '@create-figma-plugin/ui'
 import prettier from 'prettier'
 import typescriptPlugin from 'prettier/plugins/typescript'
 import estreePlugin from 'prettier/plugins/estree'
@@ -10,14 +10,20 @@ import { memo } from 'preact/compat'
 import JSZip from 'jszip'
 import {saveAs} from 'file-saver'
 import { types } from './types'
+import { emit } from '@create-figma-plugin/utilities'
 
 type Props = {
   nodes: types.Component[]
+  transformStroke: boolean
 }
 
 const codes: Record<string, string> = {}
 
-function Plugin ({ nodes }: Props) {
+function Plugin ({ nodes, transformStroke }: Props) {
+  const onChangeTransformStroke = (value: boolean) => {
+    emit('transform-stroke', value)
+  }
+
   const onClickDownloadSvgs = async () => {
     const zip = new JSZip();
     const folder = zip.folder('svg')
@@ -33,6 +39,8 @@ function Plugin ({ nodes }: Props) {
      <Container space='large'>
         <VerticalSpace space='medium'></VerticalSpace>
         <Button onClick={onClickDownloadSvgs}>svg 다운로드</Button>
+        <VerticalSpace space='medium'></VerticalSpace>
+        <Checkbox size={24} value={transformStroke} onValueChange={onChangeTransformStroke}>stroke 를 currentColor로 대체</Checkbox>
         <VerticalSpace space='medium'></VerticalSpace>
         {nodes.map(node => {
           return <div key={node.id}>
