@@ -554,12 +554,20 @@ video {
   --tw-contain-style:  ;
 }
 
+.overflow-hidden {
+  overflow: hidden;
+}
+
 .whitespace-pre {
   white-space: pre;
 }
 
 .whitespace-pre-line {
   white-space: pre-line;
+}
+
+.break-all {
+  word-break: break-all;
 }
 
 .rounded {

@@ -69,7 +69,7 @@ const PretteyCode = memo(({ code, name }: PretteyCodeProps) => {
     })
   }, [])
 
-  return <div class="whitespace-pre bg-gray-200 text-gray-800 rounded px-4 py-4">
+  return <div class="whitespace-pre bg-gray-200 text-gray-800 rounded px-4 py-4 break-all overflow-hidden">
     {formatted}
   </div>
 })

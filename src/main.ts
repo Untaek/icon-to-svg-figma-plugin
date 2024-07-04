@@ -58,7 +58,22 @@ const collectScenes = async () => {
 
     let svgMarkup = Utf8ArrayToStr(svgUintArray)
 
-    const htmlPlainProperties = ['stroke-dasharray', 'stroke-width', 'stroke-linecap', 'stroke-linejoin', 'stroke-dash-offset', 'stroke-miterlimit', 'stroke-opacity', 'stroke-width', 'clip-path', 'clip-rule', 'fill-opacity', 'fill-rule']
+    const htmlPlainProperties = [
+      'stroke-dasharray', 
+      'stroke-width', 
+      'stroke-linecap', 
+      'stroke-linejoin', 
+      'stroke-dash-offset', 
+      'stroke-miterlimit', 
+      'stroke-opacity', 
+      'stroke-width', 
+      'clip-path', 
+      'clip-rule', 
+      'fill-opacity', 
+      'fill-rule',
+      'xlink:href',
+      'xmlns:xlink'
+    ]
     svgMarkup = svgMarkup.replace('xmlns="http://www.w3.org/2000/svg"', 'xmlns="http://www.w3.org/2000/svg" {...props}')
     for(const property of htmlPlainProperties) {
       svgMarkup = svgMarkup.replace(new RegExp(property, 'g'), camelize(property))
@@ -124,5 +139,5 @@ function Utf8ArrayToStr(array: Uint8Array) {
   return out;
 }
 
-const pascalize = (s: string) => `-${s}`.split('/').join('-').replace(/-./g, x=>x[1].toUpperCase())
-const camelize = (s: string) => `${s}`.split('/').join('-').replace(/-./g, x=>x[1].toUpperCase())
+const pascalize = (s: string) => `-${s}`.split('/').join('-').replace(/-.|:./g, x=>x[1].toUpperCase())
+const camelize = (s: string) => `${s}`.split('/').join('-').replace(/-.|:./g, x=>x[1].toUpperCase())
