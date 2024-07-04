@@ -53,7 +53,7 @@ const collectScenes = async () => {
   console.log(flat)
 
   const scenePromises: Promise<types.Component>[] = flat.map(async scene => {
-    const componentName = pascalize(scene.name)
+    const componentName = pascalize(scene.name).replace(new RegExp(' ', 'g'), '_')
     const svgUintArray = await scene.node.exportAsync({format: 'SVG'})
 
     let svgMarkup = Utf8ArrayToStr(svgUintArray)
