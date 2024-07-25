@@ -72,7 +72,8 @@ const collectScenes = async () => {
       'fill-opacity', 
       'fill-rule',
       'xlink:href',
-      'xmlns:xlink'
+      'xmlns:xlink',
+      'stop-color'
     ]
     svgMarkup = svgMarkup.replace('xmlns="http://www.w3.org/2000/svg"', 'xmlns="http://www.w3.org/2000/svg" {...props}')
     for(const property of htmlPlainProperties) {
